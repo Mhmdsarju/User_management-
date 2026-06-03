@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
+import { UserRepository } from "../repositories/user.repository";
 
-const authService = new AuthService();
+const authService = new AuthService(new UserRepository());
 
 export const register = async (
   req: Request,

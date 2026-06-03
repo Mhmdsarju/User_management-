@@ -1,10 +1,13 @@
-import { UserRepository } from "../repositories/user.repository";
 import { hashPassword, comparePassword } from "../utils/bcrypt";
 import { generateToken } from "../utils/jwt";
 import { AuditLog } from "../models/mongo/auditlog.model";
+import { IUserRepository } from "../interfaces/repositories/IUserRepository";
+import { IAuthService } from "../interfaces/services/IAuthService";
 
-export class AuthService {
-  private userRepository = new UserRepository();
+export class AuthService implements IAuthService{
+  constructor(
+    private userRepository:IUserRepository
+  ){}
 
   async register(userData: {name: string;email: string;password: string;}) {
     const existingUser =
@@ -20,7 +23,7 @@ export class AuthService {
       await hashPassword(userData.password);
 
     const user =
-      await this.userRepository.createUser({
+      await this.userRepository.create({
         name: userData.name,
         email: userData.email,
         password: hashedPassword,

@@ -1,9 +1,13 @@
-import { UserRepository } from "../repositories/user.repository";
 import { AuditLog } from "../models/mongo/auditlog.model";
 import { hashPassword } from "../utils/bcrypt";
+import { IUserService } from "../interfaces/services/IUserService";
+import { IUserRepository } from "../interfaces/repositories/IUserRepository";
 
-export class UserService {
-  private userRepository = new UserRepository();
+export class UserService implements IUserService {
+
+  constructor(
+    private userRepository: IUserRepository
+  ) {}
 
   async createUser(data: {
     name: string;
@@ -11,6 +15,7 @@ export class UserService {
     password: string;
     role?: string;
   }) {
+
     const existingUser =
       await this.userRepository.findByEmail(
         data.email
@@ -24,7 +29,7 @@ export class UserService {
       await hashPassword(data.password);
 
     const user =
-      await this.userRepository.createUser({
+      await this.userRepository.create({
         ...data,
         password: hashedPassword,
       });
@@ -39,10 +44,11 @@ export class UserService {
   }
 
   async getAllUsers() {
-    return await this.userRepository.findAllUsers();
+    return await this.userRepository.findAll();
   }
 
   async getUserById(id: number) {
+
     const user =
       await this.userRepository.findById(id);
 
@@ -57,13 +63,14 @@ export class UserService {
     id: number,
     data: any
   ) {
+
     if (data.password) {
       data.password =
         await hashPassword(data.password);
     }
 
     const updatedUser =
-      await this.userRepository.updateUser(
+      await this.userRepository.update(
         id,
         data
       );
@@ -82,6 +89,7 @@ export class UserService {
   }
 
   async deleteUser(id: number) {
+
     const user =
       await this.userRepository.findById(id);
 
@@ -89,7 +97,7 @@ export class UserService {
       throw new Error("User not found");
     }
 
-    await this.userRepository.deleteUser(id);
+    await this.userRepository.delete(id);
 
     await AuditLog.create({
       action: "USER_DELETED",

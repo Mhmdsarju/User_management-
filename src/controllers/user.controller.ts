@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.service";
+import { UserRepository } from "../repositories/user.repository";
 
-const userService = new UserService();
+const userService =
+  new UserService(
+    new UserRepository()
+  );
 
 export const createUser = async (
   req: Request,
